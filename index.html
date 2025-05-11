@@ -1,0 +1,175 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>我愛真冬</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Noto Serif TC', serif;
+      background: linear-gradient(to bottom, #fffaf0, #e0ffd4);
+      color: #3a3a3a;
+      text-align: center;
+      min-height: 100vh;
+    }
+
+    #intro-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: black;
+      color: #ff69b4;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      animation: fadeIn 2s;
+    }
+
+    #intro-text {
+      font-size: 3em;
+      font-weight: bold;
+      animation: glow 1s ease-in-out infinite alternate;
+    }
+
+    #enter-button {
+      margin-top: 30px;
+      padding: 12px 24px;
+      font-size: 1.2em;
+      background-color: #ff69b4;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(255, 105, 180, 0.5);
+      transition: background-color 0.3s;
+    }
+
+    #enter-button:hover {
+      background-color: #ff1493;
+    }
+
+    @keyframes glow {
+      from {
+        text-shadow: 0 0 10px #ff69b4, 0 0 20px #ff69b4, 0 0 30px #ff69b4;
+      }
+      to {
+        text-shadow: 0 0 20px #ff1493, 0 0 30px #ff1493, 0 0 40px #ff1493;
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .main-content {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin: 20px 0;
+      color: #6a4b8a;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+    .image-container {
+      max-width: 90%;
+      width: 500px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      margin-bottom: 15px;
+    }
+    img {
+      width: 100%;
+      display: block;
+    }
+    .comment {
+      font-size: 1.2em;
+      margin: 10px 0 20px;
+      color: #555;
+    }
+    .button {
+      padding: 10px 20px;
+      font-size: 1.2em;
+      background-color: #8b5cf6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+      transition: background-color 0.3s ease;
+      margin: 5px;
+      cursor: pointer;
+    }
+    .button:hover {
+      background-color: #7c3aed;
+    }
+
+    .popup {
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px 30px;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      font-size: 1.5em;
+      z-index: 1000;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="intro-screen">
+    <div id="intro-text">長青太惡毒辣</div>
+    <button id="enter-button" onclick="enterSite()">進入主畫面</button>
+  </div>
+
+  <div class="main-content" id="main-content">
+    <div id="popup" class="popup">做這網站的人想必是天才吧</div>
+
+    <h1>我愛真冬</h1>
+
+    <div class="image-container">
+      <img src="1000021154.jpg" alt="我愛真冬">
+    </div>
+
+    <div class="comment">這是世康做的超爛網站</div>
+
+    <a class="button" href="https://www.youtube.com/watch?v=ZsvJUh03MwI" target="_blank">點我播春日影</a>
+
+    <div class="comment">🔊 開聲音再按按鈕！</div>
+    <button class="button" onclick="playSound()">按我</button>
+    <audio id="sound" src="sound.mp3"></audio>
+  </div>
+
+  <script>
+    function enterSite() {
+      document.getElementById("intro-screen").style.display = "none";
+      document.getElementById("main-content").style.display = "flex";
+
+      var popup = document.getElementById('popup');
+      popup.style.display = 'block';
+      setTimeout(() => {
+        popup.style.display = 'none';
+      }, 3000);
+    }
+
+    function playSound() {
+      var audio = document.getElementById('sound');
+      audio.play();
+    }
+  </script>
+
+</body>
+</html>
