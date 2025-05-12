@@ -262,8 +262,28 @@
   }
 
   restartBtn.onclick = () => {
-    document.location.reload();
-  };
+  // 移除所有障礙物
+  document.querySelectorAll('.obstacle').forEach(o => o.remove());
+
+  // 重設角色位置
+  character.style.bottom = "0px";
+
+  // 重設分數
+  score = 0;
+  scoreDisplay.textContent = "分數: 0";
+
+  // 隱藏重新開始按鈕
+  restartBtn.style.display = "none";
+
+  // 重新開始遊戲
+  gameRunning = true;
+  interval = setInterval(() => {
+    score++;
+    scoreDisplay.textContent = "分數: " + score;
+  }, 200);
+  obstacleInterval = setInterval(createObstacle, 2500);
+};
+
 
   window.addEventListener("click", () => {
     if (gameRunning) {
