@@ -198,7 +198,7 @@
       score++;
       scoreDisplay.textContent = "分數: " + score;
     }, 200);
-    obstacleInterval = setInterval(createObstacle, 1500);
+    obstacleInterval = setInterval(createObstacle, 2500); // 更長間距
   }
 
   function jump() {
@@ -206,22 +206,22 @@
     isJumping = true;
     let pos = 0;
     const upInterval = setInterval(() => {
-      if (pos >= 120) {
+      if (pos >= 180) { // 更高跳躍
         clearInterval(upInterval);
         const downInterval = setInterval(() => {
           if (pos <= 0) {
             clearInterval(downInterval);
             isJumping = false;
           } else {
-            pos -= 8;
+            pos -= 10;
             character.style.bottom = pos + "px";
           }
-        }, 15);
+        }, 12);
       } else {
-        pos += 8;
+        pos += 10;
         character.style.bottom = pos + "px";
       }
-    }, 15);
+    }, 12);
   }
 
   function createObstacle() {
