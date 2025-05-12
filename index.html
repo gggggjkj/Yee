@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -14,18 +13,17 @@
       min-height: 100vh;
     }
 
-    #intro-screen {
+    #intro-screen, #game-screen {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background-color: black;
-      color: #ff69b4;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      background-color: black;
+      color: #ff69b4;
       z-index: 9999;
-      animation: fadeIn 2s;
     }
 
     #intro-text {
@@ -34,7 +32,7 @@
       animation: glow 1s ease-in-out infinite alternate;
     }
 
-    #enter-button {
+    #enter-button, .button, #restart-button {
       margin-top: 30px;
       padding: 12px 24px;
       font-size: 1.2em;
@@ -47,22 +45,13 @@
       transition: background-color 0.3s;
     }
 
-    #enter-button:hover {
+    #enter-button:hover, .button:hover, #restart-button:hover {
       background-color: #ff1493;
     }
 
     @keyframes glow {
-      from {
-        text-shadow: 0 0 10px #ff69b4, 0 0 20px #ff69b4, 0 0 30px #ff69b4;
-      }
-      to {
-        text-shadow: 0 0 20px #ff1493, 0 0 30px #ff1493, 0 0 40px #ff1493;
-      }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      from { text-shadow: 0 0 10px #ff69b4, 0 0 20px #ff69b4; }
+      to { text-shadow: 0 0 20px #ff1493, 0 0 30px #ff1493; }
     }
 
     .main-content {
@@ -77,8 +66,8 @@
       font-size: 3em;
       margin: 20px 0;
       color: #6a4b8a;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
     }
+
     .image-container {
       max-width: 90%;
       width: 500px;
@@ -87,30 +76,15 @@
       box-shadow: 0 10px 25px rgba(0,0,0,0.15);
       margin-bottom: 15px;
     }
+
     img {
       width: 100%;
       display: block;
     }
+
     .comment {
       font-size: 1.2em;
       margin: 10px 0 20px;
-      color: #555;
-    }
-    .button {
-      padding: 10px 20px;
-      font-size: 1.2em;
-      background-color: #8b5cf6;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      text-decoration: none;
-      box-shadow: 0 5px 10px rgba(0,0,0,0.1);
-      transition: background-color 0.3s ease;
-      margin: 5px;
-      cursor: pointer;
-    }
-    .button:hover {
-      background-color: #7c3aed;
     }
 
     .popup {
@@ -123,53 +97,179 @@
       border-radius: 10px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.2);
       font-size: 1.5em;
-      z-index: 1000;
       display: none;
+    }
+
+    #play-area {
+      position: relative;
+      width: 800px;
+      height: 300px;
+      background-color: #fff;
+      border: 2px solid #888;
+      overflow: hidden;
+      display: none;
+      margin: 20px auto;
+    }
+
+    #character {
+      position: absolute;
+      bottom: 0;
+      left: 50px;
+      width: 60px;
+      height: 60px;
+    }
+
+    .obstacle {
+      position: absolute;
+      bottom: 0;
+      width: 40px;
+      height: 60px;
+      background-color: #ff6b6b;
+    }
+
+    #score {
+      font-size: 1.2em;
+      margin: 10px;
     }
   </style>
 </head>
 <body>
 
-  <div id="intro-screen">
-    <div id="intro-text">長青太惡毒辣</div>
-    <button id="enter-button" onclick="enterSite()">進入主畫面</button>
+<div id="intro-screen">
+  <div id="intro-text">長青太惡毒辣</div>
+  <button id="enter-button" onclick="enterSite()">進入主畫面</button>
+</div>
+
+<div class="main-content" id="main-content">
+  <div id="popup" class="popup">做這網站的人想必是天才吧</div>
+  <h1>我愛真冬</h1>
+  <div class="image-container">
+    <img src="1000021154.jpg" alt="我愛真冬">
   </div>
+  <div class="comment">這是世康做的超爛網站</div>
+  <a class="button" href="https://www.youtube.com/watch?v=ZsvJUh03MwI" target="_blank">點我播春日影</a>
+  <div class="comment">🔊 開聲音再按按鈕！</div>
+  <button class="button" onclick="playSound()">按我</button>
+  <audio id="sound" src="sound.mp3"></audio>
+  <button class="button" onclick="startGame()">開始小遊戲</button>
+</div>
 
-  <div class="main-content" id="main-content">
-    <div id="popup" class="popup">做這網站的人想必是天才吧</div>
-
-    <h1>我愛真冬</h1>
-
-    <div class="image-container">
-      <img src="1000021154.jpg" alt="我愛真冬">
-    </div>
-
-    <div class="comment">這是世康做的超爛網站</div>
-
-    <a class="button" href="https://www.youtube.com/watch?v=ZsvJUh03MwI" target="_blank">點我播春日影</a>
-
-    <div class="comment">🔊 開聲音再按按鈕！</div>
-    <button class="button" onclick="playSound()">按我</button>
-    <audio id="sound" src="sound.mp3"></audio>
+<div id="game-screen" style="display: none; background: white; color: black;">
+  <h2>跳起來閃避障礙！</h2>
+  <div id="play-area">
+    <img id="character" src="character.png" />
   </div>
+  <div id="score">分數: 0</div>
+  <button id="restart-button">重新開始</button>
+</div>
 
-  <script>
-    function enterSite() {
-      document.getElementById("intro-screen").style.display = "none";
-      document.getElementById("main-content").style.display = "flex";
+<script>
+  const popup = document.getElementById('popup');
+  const character = document.getElementById("character");
+  const scoreDisplay = document.getElementById("score");
+  const restartBtn = document.getElementById("restart-button");
+  const playArea = document.getElementById("play-area");
 
-      var popup = document.getElementById('popup');
-      popup.style.display = 'block';
-      setTimeout(() => {
-        popup.style.display = 'none';
-      }, 3000);
+  let isJumping = false;
+  let score = 0;
+  let interval;
+  let obstacleInterval;
+  let gameRunning = false;
+
+  function enterSite() {
+    document.getElementById("intro-screen").style.display = "none";
+    document.getElementById("main-content").style.display = "flex";
+    popup.style.display = 'block';
+    setTimeout(() => popup.style.display = 'none', 3000);
+  }
+
+  function playSound() {
+    document.getElementById('sound').play();
+  }
+
+  function startGame() {
+    document.getElementById("main-content").style.display = "none";
+    document.getElementById("game-screen").style.display = "flex";
+    playArea.style.display = "block";
+    score = 0;
+    scoreDisplay.textContent = "分數: 0";
+    gameRunning = true;
+    interval = setInterval(() => {
+      score++;
+      scoreDisplay.textContent = "分數: " + score;
+    }, 200);
+    obstacleInterval = setInterval(createObstacle, 1500);
+  }
+
+  function jump() {
+    if (isJumping) return;
+    isJumping = true;
+    let pos = 0;
+    const upInterval = setInterval(() => {
+      if (pos >= 120) {
+        clearInterval(upInterval);
+        const downInterval = setInterval(() => {
+          if (pos <= 0) {
+            clearInterval(downInterval);
+            isJumping = false;
+          } else {
+            pos -= 8;
+            character.style.bottom = pos + "px";
+          }
+        }, 15);
+      } else {
+        pos += 8;
+        character.style.bottom = pos + "px";
+      }
+    }, 15);
+  }
+
+  function createObstacle() {
+    if (!gameRunning) return;
+    const obstacle = document.createElement("div");
+    obstacle.classList.add("obstacle");
+    let obstacleLeft = 800;
+    obstacle.style.left = obstacleLeft + "px";
+    playArea.appendChild(obstacle);
+
+    const moveInterval = setInterval(() => {
+      if (!gameRunning) {
+        clearInterval(moveInterval);
+        return;
+      }
+      if (obstacleLeft < 0) {
+        playArea.removeChild(obstacle);
+        clearInterval(moveInterval);
+      } else {
+        obstacleLeft -= 5;
+        obstacle.style.left = obstacleLeft + "px";
+
+        const charBottom = parseInt(character.style.bottom.replace("px", "")) || 0;
+        if (obstacleLeft < 100 && obstacleLeft > 40 && charBottom < 60) {
+          gameOver();
+          clearInterval(moveInterval);
+        }
+      }
+    }, 20);
+  }
+
+  function gameOver() {
+    gameRunning = false;
+    clearInterval(interval);
+    clearInterval(obstacleInterval);
+    restartBtn.style.display = "block";
+    alert("遊戲結束！你的分數是：" + score);
+  }
+
+  restartBtn.onclick = () => {
+    document.location.reload();
+  };
+
+  window.addEventListener("click", () => {
+    if (gameRunning) {
+      jump();
     }
-
-    function playSound() {
-      var audio = document.getElementById('sound');
-      audio.play();
-    }
-  </script>
-
+  });
+</script>
 </body>
 </html>
