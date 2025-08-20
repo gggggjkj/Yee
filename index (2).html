@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>我愛真冬</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Noto Serif TC', serif;
+      background: linear-gradient(to bottom, #fffaf0, #e0ffd4);
+      color: #3a3a3a;
+      text-align: center;
+      min-height: 100vh;
+    }
+
+    #intro-screen, #game-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: black;
+      color: #ff69b4;
+      z-index: 9999;
+    }
+
+    #intro-text {
+      font-size: 3em;
+      font-weight: bold;
+      animation: glow 1s ease-in-out infinite alternate;
+    }
+
+    #enter-button, .button, #restart-button {
+      margin-top: 30px;
+      padding: 12px 24px;
+      font-size: 1.2em;
+      background-color: #ff69b4;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(255, 105, 180, 0.5);
+      transition: background-color 0.3s;
+    }
+
+    #enter-button:hover, .button:hover, #restart-button:hover {
+      background-color: #ff1493;
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #ff69b4, 0 0 20px #ff69b4; }
+      to { text-shadow: 0 0 20px #ff1493, 0 0 30px #ff1493; }
+    }
+
+    .main-content {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin: 20px 0;
+      color: #6a4b8a;
+    }
+
+    .image-container {
+      max-width: 90%;
+      width: 500px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      margin-bottom: 15px;
+    }
+
+    img {
+      width: 100%;
+      display: block;
+    }
+
+    .comment {
+      font-size: 1.2em;
+      margin: 10px 0 20px;
+    }
+
+    .popup {
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px 30px;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      font-size: 1.5em;
+      display: none;
+    }
+
+    #play-area {
+      position: relative;
+      width: 800px;
+      height: 300px;
+      background-color: #fff;
+      border: 2px solid #888;
+      overflow: hidden;
+      display: none;
+      margin: 20px auto;
+      background-image: url('background.png'); /* 新增背景圖片 */
+      background-repeat: repeat-x;
+      background-position: 0 0;
+      animation: backgroundScroll 20s linear infinite; /* 背景滾動動畫 */
+    }
+
+    @keyframes backgroundScroll {
+      from { background-position: 0 0; }
+      to { background-position: -1600px 0; }
+    }
+
+    #character {
+      position: absolute;
+      bottom: 0;
+      left: 50px;
+      width: 60px;
+      height: 60px;
+      background-color: #4a90e2;
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      animation: running 0.5s infinite alternate;
+    }
+
+    @keyframes running {
+      0% { 
+        transform: scaleX(1) scaleY(1);
+        border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      }
+      100% { 
+        transform: scaleX(0.9) scaleY(1.1);
+        border-radius: 45% 55% 45% 55% / 65% 55% 45% 35%;
+      }
+    }
+
+    #character.jumping {
+      animation: none;
+      border-radius: 50%;
+    }
+
+    #character.collision {
+      animation: collision 0.5s ease-out;
+    }
+
+    @keyframes collision {
+      0% { 
+        background-color: #4a90e2;
+        transform: scale(1);
+      }
+      50% { 
+        background-color: #ff4757;
+        transform: scale(1.2);
+      }
+      100% { 
+        background-color: #4a90e2;
+        transform: scale(1);
+      }
+    }
+
+    .obstacle {
+      position: absolute;
+      bottom: 0;
+      border-radius: 4px;
+      transition: all 0.1s ease;
+    }
+
+    .obstacle.hit {
+      animation: obstacleHit 0.3s ease-out;
+    }
+
+    @keyframes obstacleHit {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    #score {
+      font-size: 1.2em;
+      margin: 10px;
+    }
+
+    /* 排行榜樣式 */
+    #leaderboard-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+      z-index: 10000;
+      max-width: 400px;
+      width: 90%;
+      max-height: 500px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    #leaderboard-container h3 {
+      color: #6a4b8a;
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 1.8em;
+      text-align: center;
+    }
+
+    #leaderboard-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 20px 0;
+    }
+
+    #leaderboard-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      margin: 5px 0;
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      border-radius: 8px;
+      border-left: 4px solid #ff69b4;
+      font-size: 1.1em;
+    }
+
+    #leaderboard-list li:first-child {
+      background: linear-gradient(135deg, #ffd700, #ffed4e);
+      border-left-color: #ff6b35;
+      font-weight: bold;
+    }
+
+    #leaderboard-list li:nth-child(2) {
+      background: linear-gradient(135deg, #c0c0c0, #d3d3d3);
+      border-left-color: #ff8c42;
+    }
+
+    #leaderboard-list li:nth-child(3) {
+      background: linear-gradient(135deg, #cd7f32, #daa520);
+      border-left-color: #ff9f43;
+    }
+
+    .player-rank {
+      font-weight: bold;
+      color: #6a4b8a;
+      margin-right: 10px;
+    }
+
+    .player-name {
+      flex-grow: 1;
+      text-align: left;
+    }
+
+    .player-score {
+      font-weight: bold;
+      color: #ff69b4;
+    }
+
+    #close-leaderboard-button, #view-leaderboard-button {
+      background-color: #ff69b4;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background-color 0.3s;
+      margin: 5px;
+    }
+
+    #close-leaderboard-button:hover, #view-leaderboard-button:hover {
+      background-color: #ff1493;
+    }
+
+    /* 名字輸入對話框樣式 */
+    #name-input-dialog {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+      z-index: 10001;
+      text-align: center;
+      display: none;
+    }
+
+    #name-input-dialog h3 {
+      color: #6a4b8a;
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+
+    #player-name-input {
+      width: 200px;
+      padding: 10px;
+      border: 2px solid #ff69b4;
+      border-radius: 8px;
+      font-size: 1.1em;
+      margin: 10px;
+      text-align: center;
+    }
+
+    #submit-name-button, #skip-name-button {
+      background-color: #ff69b4;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      margin: 5px;
+      transition: background-color 0.3s;
+    }
+
+    #submit-name-button:hover, #skip-name-button:hover {
+      background-color: #ff1493;
+    }
+
+    #skip-name-button {
+      background-color: #6c757d;
+    }
+
+    #skip-name-button:hover {
+      background-color: #5a6268;
+    }
+  </style>
+</head>
+<body>
+
+<div id="intro-screen">
+  <div id="intro-text">長青太惡毒辣</div>
+  <button id="enter-button" onclick="enterSite()">進入主畫面</button>
+</div>
+
+<div class="main-content" id="main-content">
+  <div id="popup" class="popup">做這網站的人想必是天才吧</div>
+  <h1>我愛真冬</h1>
+  <div class="image-container">
+    <img src="1000021154.jpg" alt="我愛真冬">
+  </div>
+  <div class="comment">這是世康做的超爛網站</div>
+  <a class="button" href="https://www.youtube.com/watch?v=ZsvJUh03MwI" target="_blank">點我播春日影</a>
+  <div class="comment">🔊 開聲音再按按鈕！</div>
+  <button class="button" onclick="playSound()">按我</button>
+  <audio id="sound" src="sound.mp3"></audio>
+  <audio id="jump-sound" src="jump.mp3"></audio>
+  <audio id="gameover-sound" src="gameover.mp3"></audio>
+  <button class="button" onclick="startGame()">開始小遊戲</button>
+  <button class="button" id="view-leaderboard-button" onclick="displayLeaderboard()">查看排行榜</button>
+</div>
+
+<div id="game-screen" style="display: none; background: white; color: black;">
+  <h2>跳起來閃避障礙！</h2>
+  <div id="play-area">
+    <img id="character" src="character.png" />
+  </div>
+  <div id="score">分數: 0</div>
+  <div id="high-score">最高分數: 0</div>
+  <button id="restart-button">重新開始</button>
+</div>
+
+<!-- 排行榜容器 -->
+<div id="leaderboard-container">
+  <h3>🏆 排行榜</h3>
+  <ul id="leaderboard-list"></ul>
+  <button id="close-leaderboard-button" onclick="hideLeaderboard()">關閉</button>
+</div>
+
+<!-- 名字輸入對話框 -->
+<div id="name-input-dialog">
+  <h3>🎉 恭喜！請輸入您的名字</h3>
+  <p>您的分數：<span id="final-score-display">0</span></p>
+  <input type="text" id="player-name-input" placeholder="輸入您的名字" maxlength="20">
+  <br>
+  <button id="submit-name-button" onclick="submitPlayerName()">提交</button>
+  <button id="skip-name-button" onclick="skipNameInput()">跳過</button>
+</div>
+
+<script>
+  const popup = document.getElementById('popup');
+  const character = document.getElementById("character");
+  const scoreDisplay = document.getElementById("score");
+  const highScoreDisplay = document.getElementById("high-score");
+  const restartBtn = document.getElementById("restart-button");
+  const playArea = document.getElementById("play-area");
+
+  let isJumping = false;
+  let score = 0;
+  let highScore = localStorage.getItem("highScore") || 0;
+  highScoreDisplay.textContent = "最高分數: " + highScore;
+  let gameRunning = false;
+  let lastTime = 0;
+  let obstacleSpeed = 5;
+  let obstacleIntervalTime = 2500;
+  let lastObstacleTime = 0;
+  let scoreUpdateTime = 0;
+  
+  // 跳躍物理參數 - 限制跳躍高度不超過遊戲框
+  let velocityY = 0;
+  const gravity = 0.6; // 保持不變，維持拋物線效果
+  const jumpStrength = 17; // 從 20 調整為 17，確保跳躍高度不超過遊戲框
+
+  function enterSite() {
+    document.getElementById("intro-screen").style.display = "none";
+    document.getElementById("main-content").style.display = "flex";
+    popup.style.display = 'block';
+    setTimeout(() => popup.style.display = 'none', 3000);
+  }
+
+  function playSound() {
+    document.getElementById('sound').play();
+  }
+
+  function startGame() {
+    document.getElementById("main-content").style.display = "none";
+    document.getElementById("game-screen").style.display = "flex";
+    playArea.style.display = "block";
+    score = 0;
+    scoreDisplay.textContent = "分數: 0";
+    gameRunning = true;
+    obstacleSpeed = 5;
+    obstacleIntervalTime = 2500;
+    lastObstacleTime = 0;
+    scoreUpdateTime = 0;
+    lastTime = 0;
+    requestAnimationFrame(gameLoop);
+  }
+
+  function gameLoop(currentTime) {
+    if (!gameRunning) return;
+
+    if (lastTime === 0) lastTime = currentTime;
+    const deltaTime = currentTime - lastTime;
+    lastTime = currentTime;
+
+    // 更新跳躍邏輯
+    if (isJumping) {
+      let currentBottom = parseInt(character.style.bottom) || 0;
+      currentBottom += velocityY * (deltaTime / 16.67); // 根據 deltaTime 調整速度
+      velocityY -= gravity * (deltaTime / 16.67); // 速度受重力影響減小
+
+      // 限制跳躍高度不超過遊戲框頂部
+      const maxJumpHeight = playArea.clientHeight - character.clientHeight; // 300px - 60px = 240px
+      if (currentBottom > maxJumpHeight) {
+        currentBottom = maxJumpHeight;
+        velocityY = 0; // 到達頂部後垂直速度歸零，開始下落
+      }
+
+      if (currentBottom <= 0) { // 落地判斷
+        currentBottom = 0;
+        isJumping = false;
+        character.classList.remove('jumping');
+        velocityY = 0;
+      }
+      character.style.bottom = currentBottom + "px";
+    }
+
+    // 更新分數 (每200ms增加1分)
+    scoreUpdateTime += deltaTime;
+    if (scoreUpdateTime >= 200) {
+      score++;
+      scoreDisplay.textContent = "分數: " + score;
+      scoreUpdateTime = 0;
+
+      // 每100分加速
+      if (score % 100 === 0 && obstacleSpeed < 15) {
+        obstacleSpeed += 1;
+        obstacleIntervalTime = Math.max(500, obstacleIntervalTime - 100);
+      }
+    }
+
+    // 生成障礙物
+    lastObstacleTime += deltaTime;
+    if (lastObstacleTime >= obstacleIntervalTime) {
+      createObstacle();
+      lastObstacleTime = 0;
+    }
+
+    // 更新所有障礙物位置
+    updateObstacles(deltaTime);
+
+    requestAnimationFrame(gameLoop);
+  }
+  function jump() {
+    if (isJumping) return;
+    isJumping = true;
+    character.classList.add('jumping');
+    document.getElementById("jump-sound").play();
+    velocityY = jumpStrength; // 賦予初始跳躍速度
+  }
+  // 障礙物類型定義
+  const obstacleTypes = [
+    { width: 40, height: 60, color: '#ff6b6b', type: 'normal' },
+    { width: 30, height: 75, color: '#ff4757', type: 'tall' },
+    { width: 60, height: 40, color: '#ff3838', type: 'wide' },
+    { width: 25, height: 85, color: '#ff2f2f', type: 'super_tall' } // 高度從 100 調整為 85
+  ];
+
+  function createObstacle() {
+    if (!gameRunning) return;
+    
+    // 使用權重控制生成機率
+    const weightedObstacleTypes = [
+      ...Array(5).fill(obstacleTypes[0]), // normal 5倍機率
+      ...Array(3).fill(obstacleTypes[1]), // tall 3倍機率
+      ...Array(4).fill(obstacleTypes[2]), // wide 4倍機率
+      obstacleTypes[3] // super_tall 1倍機率
+    ];
+    const obstacleType = weightedObstacleTypes[Math.floor(Math.random() * weightedObstacleTypes.length)];
+    
+    const obstacle = document.createElement("div");
+    obstacle.classList.add("obstacle");
+    obstacle.style.width = obstacleType.width + "px";
+    obstacle.style.height = obstacleType.height + "px";
+    obstacle.style.backgroundColor = obstacleType.color;
+    obstacle.style.left = "800px";
+    obstacle.dataset.type = obstacleType.type;
+    obstacle.dataset.speed = obstacleSpeed;
+    
+    playArea.appendChild(obstacle);
+  }
+
+  function updateObstacles(deltaTime) {
+    const obstacles = document.querySelectorAll('.obstacle');
+    obstacles.forEach(obstacle => {
+      let currentLeft = parseInt(obstacle.style.left);
+      const speed = parseFloat(obstacle.dataset.speed);
+      
+      // 根據 deltaTime 計算新位置
+      const newLeft = currentLeft - (speed * deltaTime / 16.67); // 16.67ms ≈ 60fps
+      obstacle.style.left = newLeft + "px";
+      
+      // 移除離開螢幕的障礙物
+      if (newLeft < -100) {
+        obstacle.remove();
+        return;
+      }
+      
+      // 優化的碰撞檢測（提高容錯率）
+      const charBottom = parseInt(character.style.bottom.replace("px", "")) || 0;
+      const obstacleHeight = parseInt(obstacle.style.height);
+      const obstacleWidth = parseInt(obstacle.style.width);
+      
+      // 更寬容的碰撞檢測（允許角色稍微擦過障礙物頂部）
+      if (newLeft < 110 && newLeft > 30 && charBottom < obstacleHeight - 3) {
+        // 添加碰撞視覺效果
+        character.classList.add('collision');
+        obstacle.classList.add('hit');
+        
+        setTimeout(() => {
+          character.classList.remove('collision');
+        }, 500);
+        
+        gameOver();
+      }
+    });
+  }
+
+
+
+  function gameOver() {
+    gameRunning = false;
+    document.getElementById("gameover-sound").play();
+    restartBtn.style.display = "block";
+    
+    // 顯示最終分數並彈出名字輸入對話框
+    document.getElementById("final-score-display").textContent = score;
+    document.getElementById("name-input-dialog").style.display = "block";
+    document.getElementById("player-name-input").focus();
+  }
+
+  restartBtn.onclick = () => {
+    // 移除所有障礙物
+    document.querySelectorAll('.obstacle').forEach(o => o.remove());
+
+    // 重設角色位置和跳躍狀態
+    character.style.bottom = "0px";
+    character.classList.remove('jumping');
+    isJumping = false;
+    velocityY = 0;
+
+    // 重設分數和遊戲狀態
+    score = 0;
+    scoreDisplay.textContent = "分數: 0";
+    obstacleSpeed = 5;
+    obstacleIntervalTime = 2500;
+    lastObstacleTime = 0;
+    scoreUpdateTime = 0;
+    lastTime = 0;
+
+    // 隱藏重新開始按鈕
+    restartBtn.style.display = "none";
+
+    // 重新開始遊戲
+    gameRunning = true;
+    requestAnimationFrame(gameLoop);
+  };
+
+  window.addEventListener("click", () => {
+    if (gameRunning) {
+      jump();
+    }
+  });
+
+  // 排行榜相關函數
+  const API_BASE_URL = 'https://nghki1cz90mp.manus.space/api'; // 使用部署的後端 URL
+
+  async function saveScoreToLeaderboard(playerName, playerScore) {
+    try {
+      // 嘗試提交到 API
+      const response = await fetch(`${API_BASE_URL}/leaderboard`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          player_name: playerName,
+          score: playerScore
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          // API 提交成功，更新最高分數顯示
+          if (playerScore > highScore) {
+            highScore = playerScore;
+            localStorage.setItem("highScore", highScore);
+            highScoreDisplay.textContent = "最高分數: " + highScore;
+          }
+          return result.data.leaderboard;
+        }
+      }
+      
+      // API 失敗時回退到 localStorage
+      throw new Error('API 提交失敗');
+      
+    } catch (error) {
+      console.warn('API 不可用，使用本地儲存:', error);
+      
+      // 回退到原有的 localStorage 邏輯
+      let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+      leaderboard.push({ name: playerName, score: playerScore });
+      leaderboard.sort((a, b) => b.score - a.score);
+      leaderboard = leaderboard.slice(0, 10);
+      localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+      
+      if (playerScore > highScore) {
+        highScore = playerScore;
+        localStorage.setItem("highScore", highScore);
+        highScoreDisplay.textContent = "最高分數: " + highScore;
+      }
+      
+      return leaderboard;
+    }
+  }
+
+  async function displayLeaderboard() {
+    const leaderboardList = document.getElementById("leaderboard-list");
+    const leaderboardContainer = document.getElementById("leaderboard-container");
+    
+    // 清空現有列表
+    leaderboardList.innerHTML = "<li style='text-align: center; color: #6c757d;'>載入中...</li>";
+    
+    try {
+      // 嘗試從 API 獲取數據
+      const response = await fetch(`${API_BASE_URL}/leaderboard?limit=10`);
+      
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data) {
+          displayLeaderboardData(result.data);
+          leaderboardContainer.style.display = "block";
+          return;
+        }
+      }
+      
+      // API 失敗時回退到 localStorage
+      throw new Error('API 獲取失敗');
+      
+    } catch (error) {
+      console.warn('API 不可用，使用本地儲存:', error);
+      
+      // 回退到原有的 localStorage 邏輯
+      const leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+      displayLeaderboardData(leaderboard.map(entry => ({
+        player_name: entry.name,
+        score: entry.score
+      })));
+    }
+    
+    leaderboardContainer.style.display = "block";
+  }
+
+  function displayLeaderboardData(leaderboard) {
+    const leaderboardList = document.getElementById("leaderboard-list");
+    
+    // 清空現有列表
+    leaderboardList.innerHTML = "";
+    
+    if (leaderboard.length === 0) {
+      leaderboardList.innerHTML = "<li style='text-align: center; color: #6c757d;'>暫無記錄</li>";
+    } else {
+      leaderboard.forEach((player, index) => {
+        const listItem = document.createElement("li");
+        listItem.innerHTML = `
+          <span class="player-rank">#${index + 1}</span>
+          <span class="player-name">${player.player_name}</span>
+          <span class="player-score">${player.score}分</span>
+        `;
+        leaderboardList.appendChild(listItem);
+      });
+    }
+  }
+
+  function hideLeaderboard() {
+    document.getElementById("leaderboard-container").style.display = "none";
+  }
+
+  async function submitPlayerName() {
+    const playerName = document.getElementById("player-name-input").value.trim() || "匿名玩家";
+    
+    // 儲存分數到排行榜（使用 API 或 localStorage）
+    const updatedLeaderboard = await saveScoreToLeaderboard(playerName, score);
+    
+    // 隱藏名字輸入對話框
+    document.getElementById("name-input-dialog").style.display = "none";
+    
+    // 清空輸入框
+    document.getElementById("player-name-input").value = "";
+    
+    // 顯示排行榜
+    displayLeaderboard();
+  }
+
+  async function skipNameInput() {
+    // 使用匿名玩家儲存分數
+    const updatedLeaderboard = await saveScoreToLeaderboard("匿名玩家", score);
+    
+    // 隱藏名字輸入對話框
+    document.getElementById("name-input-dialog").style.display = "none";
+    
+    // 清空輸入框
+    document.getElementById("player-name-input").value = "";
+    
+    // 顯示排行榜
+    displayLeaderboard();
+  }
+
+  // 支援 Enter 鍵提交名字
+  document.getElementById("player-name-input").addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+      submitPlayerName();
+    }
+  });
+</script>
+</body>
+</html>
+
